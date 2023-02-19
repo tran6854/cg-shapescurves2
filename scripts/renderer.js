@@ -52,11 +52,18 @@ class Renderer {
         // TODO: draw at least 2 Bezier curves
         //   - variable `this.num_curve_sections` should be used for `num_edges`
         //   - variable `this.show_points` should be used to determine whether or not to render vertices
-        
-        
+        let curve1 = {a: {x: 200, y: 200}, b: {x: 280, y: 400}, c: {x: 580, y: 300} , d: {x: 500, y: 200}, color: [0, 0, 255, 255]};
+        let curve2 = {a: {x: 80, y: 550}, b: {x: 280, y: 200}, c: {x: 580, y: 600} , d: {x: 600, y: 100}, color: [0, 200, 255, 255]};
+        this.drawBezierCurve(curve1.a, curve1.b, curve1.c, curve1.d, this.num_curve_sections, curve1.color, framebuffer);
+        this.drawBezierCurve(curve2.a, curve2.b, curve2.c, curve2.d, this.num_curve_sections, curve2.color, framebuffer);
+
+        if(this.show_points){
+            this.drawBezierGuide(curve1.a, curve1.b, curve1.c, curve1.d, [curve1.color[0], curve1.color[1], curve1.color[2], 130], framebuffer);
+            this.drawBezierGuide(curve2.a, curve2.b, curve2.c, curve2.d, [curve2.color[0], curve2.color[1], curve2.color[2], 130], framebuffer);
+        }
         // Following line is example of drawing a single line
         // (this should be removed after you implement the curve)
-        this.drawLine({x: 100, y: 100}, {x: 600, y: 300}, [255, 0, 0, 255], framebuffer);
+        // this.drawLine({x: 100, y: 100}, {x: 600, y: 300}, [255, 0, 0, 255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
@@ -64,8 +71,9 @@ class Renderer {
         // TODO: draw at least 2 circles
         //   - variable `this.num_curve_sections` should be used for `num_edges`
         //   - variable `this.show_points` should be used to determine whether or not to render vertices
+        this.drawCircle({x: 400, y:300}, 40, this.num_curve_sections, [255, 0, 0, 255], framebuffer);
         
-        
+        this.drawCircle({x: 600, y:400}, 60, this.num_curve_sections, [0, 200, 0, 255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
@@ -76,10 +84,22 @@ class Renderer {
         
         // Following lines are example of drawing a single triangle
         // (this should be removed after you implement the polygon)
-        let point_a = {x:  80, y:  40};
-        let point_b = {x: 320, y: 160};
-        let point_c = {x: 240, y: 360};
-        this.drawTriangle(point_a, point_c, point_b, [0, 128, 128, 255], framebuffer);
+        let point1_a = {x: 140, y: 70};
+        let point1_b = {x: 380, y: 190};
+        let point1_c = {x: 300, y: 390};
+        let point1_d = {x: 200, y: 460};
+        let point1_e = {x: 150, y: 290};
+        
+        let point2_a = {x: 400, y: 200};
+        let point2_b = {x: 680, y: 200};
+        let point2_c = {x: 580, y: 300};
+        let point2_d = {x: 500, y: 400};
+        let point2_e = {x: 350, y: 550};
+        let point2_f = {x: 280, y: 580};
+        
+        this.drawConvexPolygon([point1_a, point1_b, point1_c, point1_d, point1_e], [180, 0, 180, 255], framebuffer);
+        this.drawConvexPolygon([point2_a, point2_b, point2_c, point2_d, point2_e, point2_f], [0, 160, 0, 255], framebuffer);
+        // this.drawTriangle(point_a, point_c, point_b, [0, 128, 128, 255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
@@ -100,8 +120,48 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawBezierCurve(p0, p1, p2, p3, num_edges, color, framebuffer) {
         // TODO: draw a sequence of straight lines to approximate a Bezier curve
+        //prompt on line 50
+        // this.drawLine({x: 100, y: 200}, {x: 600, y: 300}, [255, 0, 0, 255], framebuffer);
+        let vel = 1/num_edges;
+        let t=vel;
+        let ctrlP = {x: p0.x, y: p0.y}
         
-        
+        /*rainbow colored bezier just for testing
+        let rainbowInc=0;
+        let rainbow = [[255,0,0, 255], [255,160,0, 255], [255,230,0, 255],
+                [0, 255, 0, 255], [0,0,255, 255], [200,0,255, 255]]
+        //*/
+        while(t<=1){
+            let x = this.parametricEq(t, p0.x, p1.x, p2.x, p3.x);
+            let y = this.parametricEq(t, p0.y, p1.y, p2.y, p3.y);
+            let drawP = {x: x, y: y}
+            // console.log("{x:"+ctrlP.x+", y: "+ctrlP.y+"}, {x:"+drawP.x+", y:"+drawP.y+"}");
+            this.drawLine(ctrlP, drawP, color, framebuffer);
+            if(this.show_points){
+                this.drawVertex(drawP, color, framebuffer);
+            }
+            t+=vel;
+            /*/part of rainbow colored bezier testing
+            let newC = rainbowInc%6;
+            rainbowInc+=1;
+            this.drawLine(ctrlP, drawP, rainbow[newC], framebuffer);
+            //*/
+            ctrlP = drawP;
+        }
+    }
+
+    parametricEq(t, p0z, p1z, p2z, p3z){
+        let first = Math.pow(1-t, 3) * p0z;
+        let second = 3 * Math.pow(1-t, 2) * t * p1z;
+        let third =  3 * (1-t) * Math.pow(t, 2) * p2z
+        let fourth = Math.pow(t, 3)*p3z;
+        return Math.round(first+second+third+fourth);
+    }
+
+    drawBezierGuide(p0, p1, p2, p3, color, framebuffer){
+        this.drawLine(p0, p1, color, framebuffer);
+        this.drawLine(p1, p2, color, framebuffer);
+        this.drawLine(p2, p3, color, framebuffer);
     }
 
     // center:       object {x: __, y: __}
@@ -111,7 +171,22 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawCircle(center, radius, num_edges, color, framebuffer) {
         // TODO: draw a sequence of straight lines to approximate a circle
-        
+        //prompt on line 70
+        let ratio = 1/num_edges;
+        let seg = 2*Math.PI*ratio;
+        let p = seg;
+        let prev = {x: center.x+radius, y: center.y};
+        while(p<=2*Math.PI+seg){
+            let x = Math.round(center.x + radius * Math.cos(p));
+            let y = Math.round(center.y + radius * Math.sin(p));
+            let drawP = {x: x, y: y};
+            if(this.show_points){
+                this.drawVertex(drawP, color, framebuffer);
+            }
+            this.drawLine(prev, drawP, color, framebuffer);
+            prev = drawP;
+            p+=seg;
+        }
         
     }
     
@@ -120,7 +195,28 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawConvexPolygon(vertex_list, color, framebuffer) {
         // TODO: draw a sequence of triangles to form a convex polygon
-        
+        //prompt on line 80
+        let original = {x: vertex_list[0].x, y: vertex_list[0].y};
+        let draw1st = {x: vertex_list[1].x, y: vertex_list[1].y};
+        let draw2nd;
+        if(this.show_points){
+            this.drawVertex(original, color, framebuffer);
+            this.drawVertex(draw1st, color, framebuffer);
+        }
+        for(let i=2; i<vertex_list.length; i++){
+            draw2nd = {x: vertex_list[i].x, y: vertex_list[i].y};
+            // this.drawLine(prev, drawP, color, framebuffer);
+            if(this.show_points){
+                // this.drawVertex({x: vertex_list[i].x, y: vertex_list[i].y}, color, framebuffer);
+                this.drawVertex(draw2nd, color, framebuffer);
+            }
+            this.drawTriangle(original, draw1st, draw2nd, color, framebuffer);
+            draw1st = draw2nd;
+        }
+        // this.drawLine(original, drawP, color, framebuffer);
+        // if(this.show_points){
+        //     this.drawVertex(original, color, framebuffer);
+        // }
         
     }
     
@@ -129,7 +225,15 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawVertex(v, color, framebuffer) {
         // TODO: draw some symbol (e.g. small rectangle, two lines forming an X, ...) centered at position `v`
-        
+        let boxSize = 6;
+        let x = v.x-boxSize*0.5;
+        let y = v.y-boxSize*0.5;
+        let px = this.pixelIndex(x, y, framebuffer);
+        this.setFramebufferColor(framebuffer, px, [0,0,255,255]);
+        for(let i=0; i<2; i++){
+            this.drawLine({x: x, y: y+(i*boxSize)}, {x: x+boxSize, y: y+(i*boxSize)}, color, framebuffer);
+            this.drawLine({x: x+(i*boxSize), y: y}, {x: x+(i*boxSize), y: y+boxSize}, color, framebuffer);
+        }
         
     }
     
