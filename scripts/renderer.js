@@ -57,10 +57,6 @@ class Renderer {
         this.drawBezierCurve(curve1.a, curve1.b, curve1.c, curve1.d, this.num_curve_sections, curve1.color, framebuffer);
         this.drawBezierCurve(curve2.a, curve2.b, curve2.c, curve2.d, this.num_curve_sections, curve2.color, framebuffer);
 
-        if(this.show_points){
-            this.drawBezierGuide(curve1.a, curve1.b, curve1.c, curve1.d, [curve1.color[0], curve1.color[1], curve1.color[2], 130], framebuffer);
-            this.drawBezierGuide(curve2.a, curve2.b, curve2.c, curve2.d, [curve2.color[0], curve2.color[1], curve2.color[2], 130], framebuffer);
-        }
         // Following line is example of drawing a single line
         // (this should be removed after you implement the curve)
         // this.drawLine({x: 100, y: 100}, {x: 600, y: 300}, [255, 0, 0, 255], framebuffer);
@@ -99,7 +95,6 @@ class Renderer {
         
         this.drawConvexPolygon([point1_a, point1_b, point1_c, point1_d, point1_e], [180, 0, 180, 255], framebuffer);
         this.drawConvexPolygon([point2_a, point2_b, point2_c, point2_d, point2_e, point2_f], [0, 160, 0, 255], framebuffer);
-        // this.drawTriangle(point_a, point_c, point_b, [0, 128, 128, 255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
@@ -107,8 +102,43 @@ class Renderer {
         // TODO: draw your name!
         //   - variable `this.num_curve_sections` should be used for `num_edges`
         //   - variable `this.show_points` should be used to determine whether or not to render vertices
-        
-        
+
+        //J
+        let j0 = {x: 100, y: 200};
+        let j1 = {x: 95, y: 180};
+        let j2 = {x: 200, y: 20};
+        let j3 = {x: 180, y: 350};
+        this.drawBezierCurve(j0, j1, j2, j3, this.num_curve_sections, [0, 0, 230, 255], framebuffer);
+
+        //Dot on j
+        let d0 = {x: 180, y: 370};
+        let d1 = {x: 200, y: 380};
+        let d2 = {x: 200, y: 410};
+        let d3 = {x: 180, y: 420};
+        let d4 = {x: 160, y: 410};
+        let d5 = {x: 160, y: 380};
+        let dot = [d0, d1, d2, d3, d4, d5];
+        this.drawConvexPolygon(dot, [0, 0, 230, 255], framebuffer);
+
+        //O
+        this.drawCircle({x: 260, y: 250}, 50, this.num_curve_sections, [50, 160, 80, 255], framebuffer);
+
+        //H
+        this.drawLine({x: 330, y: 200}, {x: 330, y: 410}, [255, 80, 0, 255], framebuffer);
+        let h0 = {x: 330, y: 200};
+        let h1 = {x: 330, y: 330};
+        let h2 = {x: 430, y: 330};
+        let h3 = {x: 430, y: 200};
+        this.drawBezierCurve(h0, h1, h2, h3, this.num_curve_sections, [255, 80, 0, 255], framebuffer);
+
+        //N
+        this.drawLine({x: 460, y: 200}, {x: 460, y: 300}, [255, 120, 120, 255], framebuffer);
+        let n0 = {x: 460, y: 200};
+        let n1 = {x: 460, y: 330};
+        let n2 = {x: 560, y: 330};
+        let n3 = {x: 560, y: 200};
+        this.drawBezierCurve(n0, n1, n2, n3, this.num_curve_sections, [255, 120, 120, 255], framebuffer);
+
     }
 
     // p0:           object {x: __, y: __}
@@ -147,6 +177,9 @@ class Renderer {
             this.drawLine(ctrlP, drawP, rainbow[newC], framebuffer);
             //*/
             ctrlP = drawP;
+        }
+        if(this.show_points){
+            this.drawBezierGuide(p0, p1, p2, p3, [color[0], color[1], color[2], 130], framebuffer);
         }
     }
 
@@ -193,6 +226,7 @@ class Renderer {
     // vertex_list:  array of object [{x: __, y: __}, {x: __, y: __}, ..., {x: __, y: __}]
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
+    
     drawConvexPolygon(vertex_list, color, framebuffer) {
         // TODO: draw a sequence of triangles to form a convex polygon
         //prompt on line 80
@@ -205,18 +239,13 @@ class Renderer {
         }
         for(let i=2; i<vertex_list.length; i++){
             draw2nd = {x: vertex_list[i].x, y: vertex_list[i].y};
-            // this.drawLine(prev, drawP, color, framebuffer);
             if(this.show_points){
-                // this.drawVertex({x: vertex_list[i].x, y: vertex_list[i].y}, color, framebuffer);
                 this.drawVertex(draw2nd, color, framebuffer);
             }
-            this.drawTriangle(original, draw1st, draw2nd, color, framebuffer);
+            //drawTriangle for some reason (I think the swap) messes up the draw2nd variable, so we have to retype it
+            this.drawTriangle(original, draw1st, {x: vertex_list[i].x, y: vertex_list[i].y}, color, framebuffer);
             draw1st = draw2nd;
         }
-        // this.drawLine(original, drawP, color, framebuffer);
-        // if(this.show_points){
-        //     this.drawVertex(original, color, framebuffer);
-        // }
         
     }
     
